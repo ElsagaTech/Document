@@ -1,33 +1,38 @@
-## Tích hợp trang đặt khám MeApp cho website, ứng dụng bên thứ 3
+# Tích hợp trang đặt khám MeApp cho website, ứng dụng bên thứ 3
 
-> **POST:** /v1/appointment
+## 1. API
 
-| Attribute | Type | Required | Default | Description |
+### 1.1. Request
+> **POST:** https://gateway.meapp.vn/v1/appointment
+
+| Giá trị | Kiểu | Yêu cầu | Mặc định | Mô tả |
 | --- | --- | --- | --- | --- |
-partnerCode | `string` | `Required` | | Mã đối tác
-partnerName | `string` | `Optional` | `""` | Tên hiển thị của đối tác
-requestId | `string` | `Required` | | Mã duy nhất sinh ra từ đối tác, nên sử dụng UUID v4
-amount | `long` | `Optional` | `0` | Giá tiền gói thanh toán
-orderId | `string` | `Required` | | Id thanh toán của đối tác
-orderInfo | `string` | `Required` | | Thông tin thanh toán
-redirectUrl | `string` | `Required` | | Url nhận callback của đối tác, dùng để nhận kết quả đặt khám thành công
-extraData | `string` | `Optional` | `""` | Encode Base64 theo định dạng Json: `{"key": "value"}` Ví dụ với dữ liệu: `{"username": "meapp"}` thì data extraData: `eyJ1c2VybmFtZSI6ICJtZWFwcCJ9`
-signature | `string` | `Required` | | Chữ ký để xác nhận bảo toàn dữ liệu. Sử dụng thuật toán Hmac_SHA256 với data phía trên theo định dạng được sort từ a-z: *accessKey=`$accessKey`&amount=`$amount`&extraData=`$extraData`&orderId=`$orderId`&orderInfo=`$orderInfo`&partnerCode=`$partnerCode`&partnerName=`$partnerName`&redirectUrl=`$redirectUrl`&requestId=`$requestId`*
+partnerCode | `string` | `Bắt buộc` | | Mã đối tác
+partnerName | `string` | `Tuỳ chọn` | `""` | Tên hiển thị của đối tác
+requestId | `string` | `Bắt buộc` | | Mã duy nhất sinh ra từ đối tác, nên sử dụng UUID v4
+amount | `long` | `Tuỳ chọn` | `0` | Giá tiền gói thanh toán
+orderId | `string` | `Bắt buộc` | | Id thanh toán của đối tác
+orderInfo | `string` | `Bắt buộc` | | Thông tin thanh toán
+redirectUrl | `string` | `Bắt buộc` | | Url nhận callback của đối tác, dùng để nhận kết quả đặt khám thành công
+extraData | `string` | `Tuỳ chọn` | `""` | Encode **Base64** theo định dạng Json: `{"key": "value"}` <br>Ví dụ với dữ liệu: `{"username": "meapp"}` thì data extraData: `eyJ1c2VybmFtZSI6ICJtZWFwcCJ9`
+signature | `string` | `Bắt buộc` | | Chữ ký để xác nhận bảo toàn dữ liệu. <br>Sử dụng thuật toán **Hmac_SHA256** với data phía trên theo định dạng được sort từ a-z:<br> *accessKey=`$accessKey`&amount=`$amount`&extraData=`$extraData`&orderId=`$orderId`&<br>orderInfo=`$orderInfo`&partnerCode=`$partnerCode`&partnerName=`$partnerName`&<br>redirectUrl=`$redirectUrl`&requestId=`$requestId`*
 
-> accessKey tạm thời fixed gủi cho bên đối tác
+Trong đó: 
+* `partnerCode` và `accessKey` được gửi riêng cho đối tác
+* Dữ liệu `extraData` dùng để hiển thị thông tin người dùng khi mở trang đặt khám, theo định dạng
 
-> Dữ liệu extraData dùng để hiển thị thông tin người dùng khi mở trang đặt khám, theo format 
-```json
-{ 
-    "phoneNumber": "123", 
-    "fullName": "ABC", 
-    "birthDay": "11/11/2021", 
-    "gender": 1 
-}
-``` 
-> Chú ý trường gender thì `1` là nam, `2` là nữ
+    ```json
+    { 
+        "phoneNumber": "123", 
+        "fullName": "ABC", 
+        "birthDay": "11/11/2021", 
+        "gender": 1 
+    }
+    ``` 
+* `birthDay`: dd/MM/yyyyy
+* `gender`: `1` - Nam, `2` - Nữ
 
-**Sample**
+### Ví dụ
 ```json
 {
     "partnerCode": "MEAPP",
@@ -42,9 +47,9 @@ signature | `string` | `Required` | | Chữ ký để xác nhận bảo toàn d�
 }
 ```
 
-## Response
+### 1.2. Response
 
-| Attribute | Type | Description |
+| Giá trị | Kiểu | Mô tả |
 | --- | --- | --- |
 partnerCode | `string` | Mã đối tác
 requestId | `string` | Mã duy nhất sinh ra từ đối tác, nên sử dụng UUID v4
@@ -52,19 +57,19 @@ amount | `long` | Giá tiền gói thanh toán
 orderId | `string` | Id thanh toán của đối tác
 appointmentUrl | `string` | Url trang đặt khám, đối tác có thể mở webview hoặc mở trình duyệt ngoài
 
-**Sample**
+### Ví dụ
 ```json
 {
     "partnerCode": "MEAPP",
     "requestId": "",
     "amount": 10000,
     "orderId": "",
-    "appointmentUrl": "http://datkham.meapp.vn?sessionId=123456"
+    "appointmentUrl": "https://datkham.meapp.vn?sessionId=xxxxxx"
 }
 ```
 
-## Sau khi đặt khám thành công
+## 2. Sau khi đặt khám thành công
 
-Call `GET` vào redirectUrl bên đối tác gửi lúc đăng ký đặt khám theo format
+Call `GET` vào redirectUrl bên đối tác gửi lúc đăng ký đặt khám theo định dạng
 
-*`$redirectUrl`?resultCode=`0`&requestId=`$requestId`*
+*`redirectUrl`?resultCode=`0`&requestId=`$requestId`*
