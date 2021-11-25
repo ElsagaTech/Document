@@ -15,7 +15,7 @@ orderId | `string` | `Bắt buộc` | | Id thanh toán của đối tác
 orderInfo | `string` | `Bắt buộc` | | Thông tin thanh toán
 redirectUrl | `string` | `Bắt buộc` | | Url nhận callback của đối tác, dùng để nhận kết quả đặt khám thành công
 extraData | `string` | `Tuỳ chọn` | `""` | Encode **Base64** theo định dạng Json: `{"key": "value"}` <br>Ví dụ với dữ liệu: `{"username": "meapp"}` thì data extraData: `eyJ1c2VybmFtZSI6ICJtZWFwcCJ9`
-signature | `string` | `Bắt buộc` | | Chữ ký để xác nhận bảo toàn dữ liệu. <br>Sử dụng thuật toán **Hmac_SHA256** với data phía trên theo định dạng được sort từ a-z:<br> *accessKey=`$accessKey`&amount=`$amount`&extraData=`$extraData`&orderId=`$orderId`&<br>orderInfo=`$orderInfo`&partnerCode=`$partnerCode`&partnerName=`$partnerName`&<br>redirectUrl=`$redirectUrl`&requestId=`$requestId`*
+signature | `string` | `Bắt buộc` | | Chữ ký để xác nhận bảo toàn dữ liệu. <br>Sử dụng thuật toán **Hmac_SHA256** với data phía trên theo định dạng được sort từ a-z:<br> *accessKey=`$accessKey`&amount=`$amount`&extraData=`$extraData`&<br>orderId=`$orderId`&orderInfo=`$orderInfo`&partnerCode=`$partnerCode`&<br>partnerName=`$partnerName`&redirectUrl=`$redirectUrl`&requestId=`$requestId`*
 
 Trong đó: 
 * `partnerCode` và `accessKey` được gửi riêng cho đối tác
