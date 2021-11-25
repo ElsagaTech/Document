@@ -33,8 +33,8 @@ Trong đó:
         "gender": 1 
     }
     ``` 
-* `birthDay`: dd/MM/yyyyy
-* `gender`: `1` - Nam, `2` - Nữ
+    - `birthDay`: dd/MM/yyyy
+    - `gender`: `1` - Nam, `2` - Nữ
 
 ### Ví dụ mẫu
 ```json
@@ -51,6 +51,8 @@ Trong đó:
 }
 ```
 
+### Gọi với `CURL`
+
 ```sh
 curl -H "Content-Type: application/json" \
   -X POST \
@@ -62,6 +64,8 @@ curl -H "Content-Type: application/json" \
 
 | Giá trị | Kiểu | Mô tả |
 | :--- | :--- | :--- |
+resultCode | `string` | Mã lỗi
+resultMessage | `string` | Thông báo lỗi
 partnerCode | `string` | Mã đối tác
 requestId | `string` | Mã duy nhất sinh ra từ đối tác, nên sử dụng UUID v4
 amount | `long` | Giá tiền gói thanh toán
