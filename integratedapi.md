@@ -15,8 +15,8 @@ partnerCode | `string` | `Bắt buộc` | | Mã đối tác
 partnerName | `string` | `Tuỳ chọn` | `""` | Tên hiển thị của đối tác
 requestId | `string` | `Bắt buộc` | | Mã duy nhất sinh ra từ đối tác, nên sử dụng UUID v4
 amount | `long` | `Tuỳ chọn` | `0` | Giá tiền gói thanh toán
-orderId | `string` | `Bắt buộc` | | Id thanh toán của đối tác
-orderInfo | `string` | `Bắt buộc` | | Thông tin thanh toán
+orderId | `string` | `Tuỳ chọn` | | Id thanh toán của đối tác
+orderInfo | `string` | `Tuỳ chọn` | | Thông tin thanh toán
 redirectUrl | `string` | `Bắt buộc` | | Url nhận callback của đối tác, dùng để nhận kết quả đặt khám thành công
 extraData | `string` | `Tuỳ chọn` | `""` | Encode **Base64** theo định dạng Json: `{"key": "value"}` <br>Ví dụ với dữ liệu: `{"username": "meapp"}` thì data extraData: `eyJ1c2VybmFtZSI6ICJtZWFwcCJ9`
 signature | `string` | `Bắt buộc` | | Chữ ký để xác nhận bảo toàn dữ liệu. <br>Sử dụng thuật toán **SHA256** với data phía trên theo định dạng được sort từ a-z:<br> *accessKey=`$accessKey`&amount=`$amount`&extraData=`$extraData`&<br>orderId=`$orderId`&orderInfo=`$orderInfo`&partnerCode=`$partnerCode`&<br>partnerName=`$partnerName`&redirectUrl=`$redirectUrl`&requestId=`$requestId`*
