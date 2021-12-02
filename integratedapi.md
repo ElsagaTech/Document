@@ -1,35 +1,22 @@
 # Tích hợp trang đặt khám MeApp cho website, ứng dụng bên thứ 3
 
-## 1. API
+## 1. Web đặt khám
 
-### 1.1. Request
-> Liên kết: https://gateway.meapp.vn/v1/appointment
-
-> Phương thức: POST
-
-> Dữ liệu: Json
+> Liên kết: https://datkham.meapp.vn?`QUERY_STRING`
 
 | Giá trị | Kiểu | Yêu cầu | Mặc định | Mô tả |
 | :--- | :--- | :--- | :--- | :--- |
-partnerCode | `string` | `Bắt buộc` | | Mã đối tác
-partnerName | `string` | `Tuỳ chọn` | `""` | Tên hiển thị của đối tác
-requestId | `string` | `Bắt buộc` | | Mã duy nhất sinh ra từ đối tác, nên sử dụng UUID v4
-amount | `long` | `Tuỳ chọn` | `0` | Giá tiền gói thanh toán
-orderId | `string` | `Tuỳ chọn` | | Id thanh toán của đối tác
-orderInfo | `string` | `Tuỳ chọn` | | Thông tin thanh toán
-redirectUrl | `string` | `Bắt buộc` | | Url nhận callback của đối tác, dùng để nhận kết quả đặt khám thành công
+partnerCode | `string` | `Tuỳ chọn` | | Mã đối tác
 extraData | `string` | `Tuỳ chọn` | `""` | Encode **Base64** theo định dạng Json: `{"key": "value"}` <br>Ví dụ với dữ liệu: `{"username": "meapp"}` thì data extraData: `eyJ1c2VybmFtZSI6ICJtZWFwcCJ9`
-signature | `string` | `Bắt buộc` | | Chữ ký để xác nhận bảo toàn dữ liệu. <br>Sử dụng thuật toán **SHA256** với data phía trên theo định dạng được sort từ a-z:<br> *accessKey=`$accessKey`&amount=`$amount`&extraData=`$extraData`&<br>orderId=`$orderId`&orderInfo=`$orderInfo`&partnerCode=`$partnerCode`&<br>partnerName=`$partnerName`&redirectUrl=`$redirectUrl`&requestId=`$requestId`*
 
-Trong đó: 
-* `partnerCode` và `accessKey` được gửi riêng cho đối tác
+* Mã đối tác dùng để xác định đối tác mở webview, chỉ hiển thị phương thức thanh toán online duy nhất của đối tác
 * Dữ liệu `extraData` dùng để hiển thị thông tin người dùng khi mở trang đặt khám, theo định dạng
 
     ```json
     { 
         "phoneNumber": "123", 
         "fullName": "ABC", 
-        "birthDay": "11/11/2021", 
+        "birthDay": "20/11/2021", 
         "gender": 1 
     }
     ``` 
@@ -37,56 +24,111 @@ Trong đó:
     - `gender`: `1` - Nam, `2` - Nữ
 
 ### Ví dụ mẫu
+```
+https://datkham.meapp.vn?partnerCode=appota&extraData=eyAicGhvbmVOdW1iZXIiOiAiMTIzIiwgImZ1bGxOYW1lIjogIkFCQyIsICJiaXJ0aERheSI6ICIyNC8xMS8yMDIxIiwgImdlbmRlciI6IDEgfQ
+```
+
+<!-- ## 2. Sau khi đặt khám thành công
+Call vào API thanh toán của đối tác nếu có phí dịch vụ -->
+
+## 2. API kiểm tra đơn hàng Appota
+
+### 2.1. Request
+
+> Liên kết: https://gateway.meapp.vn/v1/appota/check_order
+
+> Phương thức: POST
+
+> Dữ liệu: Json
+
+| Giá trị | Kiểu | Yêu cầu | Mặc định | Mô tả |
+| :--- | :--- | :--- | :--- | :--- |
+order_id | `string` | `Bắt buộc` | | Mã giao dịch
+amount | `int` | `Bắt buộc` | `""` | Số tiền giao dịch
+check_sum | `string` | `Bắt buộc` | | Chữ ký
+
+Trong đó: 
+* Định dạng chữ ký `check_sum`
+
+    ```csharp
+    SHA256($"{amount}.{order_id}.{SECRET_KEY}")
+    ``` 
+    - `SECRET_KEY`: được gửi riêng cho đối tác
+
+### Ví dụ mẫu
 ```json
 {
-    "partnerCode": "MEAPP",
-    "partnerName": "Test",
-    "requestId": "1",
     "amount": 10000,
-    "orderId": "1",
-    "orderInfo": "Test",
-    "redirectUrl": "http://localhost",
-    "extraData": "eyAicGhvbmVOdW1iZXIiOiAiMTIzIiwgImZ1bGxOYW1lIjogIkFCQyIsICJiaXJ0aERheSI6ICIyNC8xMS8yMDIxIiwgImdlbmRlciI6IDEgfQ",
-    "signature": "86c60c55699ce58abe9feaa0889643fbfa4f5880bc0919b85ba3c426418f19b2"
+    "orderId": "123",
+    "check_sum": "87013a41259c976cc1a1beb8218a5b177849ab1276560b2eabbbe32c60fd1aec"
+    // Với secret ví dụ là MEAPP, format raw có dạng 10000.123.MEAPP
 }
 ```
 
-### Gọi với `CURL`
+### 2.2. Response
 
-```sh
-curl -H "Content-Type: application/json" \
-  -X POST \
-  -d '{"partnerCode":"MEAPP", "partnerName":"Test", "requestId":"1", "amount": 10000, "orderId": "1", "orderInfo":"", "redirectUrl": "http://localhost", "extraData": "eyAicGhvbmVOdW1iZXIiOiAiMTIzIiwgImZ1bGxOYW1lIjogIkFCQyIsICJiaXJ0aERheSI6ICIyNC8xMS8yMDIxIiwgImdlbmRlciI6IDEgfQ","signature": "86c60c55699ce58abe9feaa0889643fbfa4f5880bc0919b85ba3c426418f19b2"}' \
-  https://gateway.meapp.vn/v1/appointment
-```
-
-### 1.2. Response
-
-| Giá trị | Kiểu | Mô tả |
-| :--- | :--- | :--- |
-resultCode | `string` | Mã lỗi
-resultMessage | `string` | Thông báo lỗi
-partnerCode | `string` | Mã đối tác
-requestId | `string` | Mã duy nhất sinh ra từ đối tác, nên sử dụng UUID v4
-amount | `long` | Giá tiền gói thanh toán
-orderId | `string` | Id thanh toán của đối tác
-appointmentUrl | `string` | Url trang đặt khám, đối tác có thể mở webview hoặc mở trình duyệt ngoài
-
+| Giá trị | Kiểu | Yêu cầu | Mặc định | Mô tả |
+| :--- | :--- | :--- | :--- | :--- |
+status | `bool` | `Bắt buộc` | | Trạng thái
+error_message | `string` | `Bắt buộc` | `""` | Thông báo
+order_info | `object` | `Tùy chọn` | | Thông tin order nếu status là `true`
 ### Ví dụ
 ```json
 {
-    "resultCode": 0,
-    "resultMessage": "Thành công",
-    "partnerCode": "MEAPP",
-    "requestId": "1",
+  "status": true,
+  "error_message": "Thành công",
+  "order_info": {
+    "id": "123",
+    "name": "Tên dịch vụ hiển thị"
+  }
+}
+```
+## 3. API cập nhật thanh toán đơn hàng Appota
+
+### 3.1. Request
+
+> Liên kết: https://gateway.meapp.vn/v1/appota/update_order
+
+> Phương thức: POST
+
+> Dữ liệu: Json
+
+| Giá trị | Kiểu | Yêu cầu | Mặc định | Mô tả |
+| :--- | :--- | :--- | :--- | :--- |
+order_id | `string` | `Bắt buộc` | | Mã giao dịch
+amount | `int` | `Bắt buộc` | `""` | Số tiền giao dịch
+check_sum | `string` | `Bắt buộc` | | Chữ ký
+appotapay_transaction_id | `string` | `Bắt buộc` | | Mã giao dịch của Appota
+
+Trong đó: 
+* Định dạng chữ ký `check_sum`
+
+    ```csharp
+    SHA256($"{amount}.{order_id}.{appotapay_transaction_id}.{SECRET_KEY}")
+    ``` 
+    - `SECRET_KEY`: được gửi riêng cho đối tác
+
+### Ví dụ mẫu
+```json
+{
     "amount": 10000,
-    "orderId": "1",
-    "appointmentUrl": "https://datkham.meapp.vn?sessionId=e1782bb94e83f1d5083545dd9e8b9a52b5581713eb0de8d96b0163f7e62435f7"
+    "orderId": "123",
+    "appotapay_transaction_id": "TRANS_ABC",
+    "check_sum": "a871d9e31e10e52840e5f21123ab764bba2a66ad97e32aa7c2499454cdb691e6"
+    // Với secret ví dụ là MEAPP, format raw có dạng 10000.123.TRANS_ABC.MEAPP
 }
 ```
 
-## 2. Sau khi đặt khám thành công
+### 3.2. Response
 
-Call `GET` vào redirectUrl bên đối tác gửi lúc đăng ký đặt khám theo định dạng
-
-*`redirectUrl`?resultCode=`0`&requestId=`$requestId`*
+| Giá trị | Kiểu | Yêu cầu | Mặc định | Mô tả |
+| :--- | :--- | :--- | :--- | :--- |
+status | `bool` | `Bắt buộc` | | Trạng thái
+error_message | `string` | `Bắt buộc` | `""` | Thông báo
+### Ví dụ
+```json
+{
+  "status": true,
+  "error_message": "Thành công"
+}
+```
