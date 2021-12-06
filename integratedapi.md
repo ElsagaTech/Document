@@ -59,7 +59,7 @@ Trong đó:
 ```json
 {
     "amount": 10000,
-    "orderId": "123",
+    "order_id": "123",
     "check_sum": "87013a41259c976cc1a1beb8218a5b177849ab1276560b2eabbbe32c60fd1aec"
     // Với secret ví dụ là MEAPP, format raw có dạng 10000.123.MEAPP
 }
@@ -112,7 +112,7 @@ Trong đó:
 ```json
 {
     "amount": 10000,
-    "orderId": "123",
+    "order_id": "123",
     "appotapay_transaction_id": "TRANS_ABC",
     "check_sum": "a871d9e31e10e52840e5f21123ab764bba2a66ad97e32aa7c2499454cdb691e6"
     // Với secret ví dụ là MEAPP, format raw có dạng 10000.123.TRANS_ABC.MEAPP
