@@ -35,7 +35,7 @@ Call vào API thanh toán của đối tác nếu có phí dịch vụ -->
 
 ### 2.1. Request
 
-> Liên kết: https://gateway.meapp.vn/v1/appota/check_order
+> Liên kết: https://gateway.benhvien.tech/v1/appota/check_order
 
 > Phương thức: POST
 
@@ -87,7 +87,7 @@ order_info | `object` | `Tùy chọn` | | Thông tin order nếu status là `tru
 
 ### 3.1. Request
 
-> Liên kết: https://gateway.meapp.vn/v1/appota/update_order
+> Liên kết: https://gateway.benhvien.tech/v1/appota/update_order
 
 > Phương thức: POST
 
