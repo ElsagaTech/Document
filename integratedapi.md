@@ -35,7 +35,7 @@ Call vào API thanh toán của đối tác nếu có phí dịch vụ -->
 
 ### 2.1. Request
 
-> Liên kết: https://gateway.benhvien.tech/v1/appota/check_order
+> Liên kết: https://gateway.meapp.vn/v1/appota/check_order
 
 > Phương thức: POST
 
@@ -59,7 +59,7 @@ Trong đó:
 ```json
 {
     "amount": 10000,
-    "order_id": "123",
+    "orderId": "123",
     "check_sum": "87013a41259c976cc1a1beb8218a5b177849ab1276560b2eabbbe32c60fd1aec"
     // Với secret ví dụ là MEAPP, format raw có dạng 10000.123.MEAPP
 }
@@ -87,7 +87,7 @@ order_info | `object` | `Tùy chọn` | | Thông tin order nếu status là `tru
 
 ### 3.1. Request
 
-> Liên kết: https://gateway.benhvien.tech/v1/appota/update_order
+> Liên kết: https://gateway.meapp.vn/v1/appota/update_order
 
 > Phương thức: POST
 
@@ -112,10 +112,57 @@ Trong đó:
 ```json
 {
     "amount": 10000,
-    "order_id": "123",
+    "orderId": "123",
     "appotapay_transaction_id": "TRANS_ABC",
     "check_sum": "a871d9e31e10e52840e5f21123ab764bba2a66ad97e32aa7c2499454cdb691e6"
     // Với secret ví dụ là MEAPP, format raw có dạng 10000.123.TRANS_ABC.MEAPP
+}
+```
+
+### 3.2. Response
+
+| Giá trị | Kiểu | Yêu cầu | Mặc định | Mô tả |
+| :--- | :--- | :--- | :--- | :--- |
+status | `bool` | `Bắt buộc` | | Trạng thái
+error_message | `string` | `Bắt buộc` | `""` | Thông báo
+### Ví dụ
+```json
+{
+  "status": true,
+  "error_message": "Thành công"
+}
+```
+## 4. API hoàn tiền
+
+### 4.1. Request
+
+> Liên kết: https://gateway.meapp.vn/v1/appota/refund
+
+> Phương thức: POST
+
+> Dữ liệu: Json
+
+| Giá trị | Kiểu | Yêu cầu | Mặc định | Mô tả |
+| :--- | :--- | :--- | :--- | :--- |
+order_id | `string` | `Bắt buộc` | | Mã giao dịch
+check_sum | `string` | `Bắt buộc` | | Chữ ký
+appotapay_transaction_id | `string` | `Bắt buộc` | | Mã giao dịch của Appota
+
+Trong đó: 
+* Định dạng chữ ký `check_sum`
+
+    ```csharp
+    SHA256($"{order_id}.{appotapay_transaction_id}.{SECRET_KEY}")
+    ``` 
+    - `SECRET_KEY`: được gửi riêng cho đối tác
+
+### Ví dụ mẫu
+```json
+{
+    "orderId": "123",
+    "appotapay_transaction_id": "TRANS_ABC",
+    "check_sum": "5e988777abcd36d484de3a2b1dc22b83a207f737afc61100ee78c4356a3734d2"
+    // Với secret ví dụ là MEAPP, format raw có dạng 123.TRANS_ABC.MEAPP
 }
 ```
 
